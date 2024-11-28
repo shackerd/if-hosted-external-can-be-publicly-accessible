@@ -1,8 +1,10 @@
-# InBrowser WASM / Javascript HTTP Reverse Proxy
+# Your browser tab act as a HTTP Server, almost
+Okay, it still needs a friend.
 
-This project is a WebAssembly (WASM) and JavaScript-based reverse proxy server. It uses WebSockets to establish a tunnel between the client and the server, allowing for real-time communication.
 
-In this demo project, the goal is to connect the server websocket from webpage and act like a reverse tcp. The server relays incoming requests to the webpage websocket handler. So now a webpage can act as a HTTP server.
+This project is a JavaScript-based (or can be WebAssembly (WASM)-based) HTTP handler but in a reverse tcp way. It uses WebSockets to establish a tunnel between the client and the server, allowing for real-time communication.
+
+In this demo project, we connect the server (reverse proxy) websocket from browser tab and act like a dependency of the reverse proxy. The server relays incoming requests to the webpage websocket handler. So now a webpage can act as a HTTP server.
 
 > [!IMPORTANT]
 > If server is hosted in a public network, the webpage can be publicly accessible, use with caution.
@@ -17,7 +19,7 @@ In this demo project, the goal is to connect the server websocket from webpage a
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/shackerd/wasm-http-reverse-proxy.git
+    git clone https://github.com/shackerd/webpage-act-as-http-server.git
     cd wasm-http-reverse-proxy
     ```
 
