@@ -4,7 +4,7 @@ Okay, it still needs a friend.
 
 This project is a JavaScript-based (or can be WebAssembly (WASM)-based) HTTP handler but in a reverse tcp way. It uses WebSockets to establish a tunnel between the client and the server, allowing for real-time communication.
 
-In this demo project, we connect the server (reverse proxy) websocket from browser tab and act like a dependency of the reverse proxy. The server relays incoming requests to the webpage websocket handler. So now a webpage can act as a HTTP server.
+In this demo project, we connect the server (reverse proxy) websocket from browser tab and act like a dependency. The server relays incoming requests to the webpage websocket handler. So now a webpage can act as a HTTP server.
 
 > [!IMPORTANT]
 > If server is hosted in a public network, the webpage can be publicly accessible, use with caution.
