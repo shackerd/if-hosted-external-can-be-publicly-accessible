@@ -9,6 +9,16 @@ In this demo project, we connect the server (reverse proxy) websocket from brows
 > [!IMPORTANT]
 > If server is hosted in a public network, the webpage can be publicly accessible, use with caution.
 
+```mermaid
+flowchart TD
+    A[Browser tab] -->|1-Websocket| B[RP server socket]
+    D[External HTTP client] -->|2-HTTP request| B
+    B --> C{RP Routing logic}
+    C -->|3-Forward request| A
+    A -->|4-Send response| C
+    C -->|5-Forward response| D
+```
+
 ## Getting Started
 
 ### Prerequisites
