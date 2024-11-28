@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home</title>
+</head>
+<body>
+    <h1>WASM/Javascript "inbrowser server" reverse proxy</h1>
+    <input type="button" value="Connect" id="connect" />
+    <input type="button" value="Disconnect" id="disconnect" />
+    <input type="button" value="Clear" id="clear" />
+    <br />
+    <label>Send 403</label>
+    <input type="checkbox" id="forbidden" />
+    <br />
+    <label>Benchmark</label>
+    <input type="checkbox" id="benchmark" />
+    <br />
+    Tunnel to: <a href="./tunnel" id="tunnel" target="_blank"></a>
+    <br />
+    You can open the tunnel url in curl too, you will see the incoming requests down below
+    <br />
+    <textarea id="output" rows="20" cols="250"></textarea>
+    <script text="text/javascript">
+
+        var ws;
+        var output = document.getElementById("output");
+        var forbidden = document.getElementById("forbidden");
+        var benchmark = document.getElementById("benchmark");
+        var tunnel = document.getElementById("tunnel");
+
+        // we must start somewhere
+        document.getElementById("connect").addEventListener("click", () => {
+
+            // get our ticket to join the tunnel party
+            fetch("./tunnel", { method: "POST", redirect: "manual" })
+                .then(data => {
+
+                    // get ws tunnel endpoint location
+                    var loc = data.headers.get("Location");
+
+                    // compute reverse proxy endpoint from ws location to open link in a new window
+                    // because i did it manually to often and i'm tired, don't judge me
+                    const regex = /\/ws\/(.*)/g;
+                    var ep = "./route/" + regex.exec(loc)[1];
+
+                    tunnel.href = ep;
+                    tunnel.innerText = ep;
+
+                    // open ws connection to instantiate the tunnel
+                    ws = new WebSocket("ws://localhost:5230" + loc);
+
+                    // this may be useful somewhere
+                    var requestId = 0;
+
+                    // sounds professional
+                    ws.onopen = function() { output.value = "Connected\n"; };
+
+                    // where the request and response are baked
+                    ws.onmessage = function(evt) {
+
+                        // if benchmark is checked, don't display the response or even scroll in output, this is to avoid redraw and improve cpu performance
+                        // however javascript will still process the request and response so it will be slower than WASM, oubviously..
+                        // To be honest javascript has shitty performance for this kind of task, so please for the love of god don't do that
+                        // Yes i know, i'm a bad person, i'm a monster, but i did it for science and to show you how bad it is
+                        if (!benchmark.checked) {
+                            output.value += new Date().toLocaleString("en-US") + " : " + evt.data + "\n";
+                            output.scrollTop = output.scrollHeight;
+                        }
+
+                        requestId += 1;
+
+                        // this is the response that will be sent back to the client through the tunnel
+                        var response = {
+
+                            StatusCode: 200,
+                            Body: '<!DOCTYPE html><html><head><title>Hello</title><script type="text/javascript">document.addEventListener("DOMContentLoaded", () => { document.getElementById("ua").innerText = navigator.userAgent; }); setTimeout(function(){location.reload();},5000);<\/script></head><body><h1>Hello from JS!</h1>Don\'t worry this page has an auto refresh<div>Response from : ' + window.location.href + ' on ' + navigator.userAgent + '</div><br />Request from : <div id="ua"></div><div style="text-align: center; display:flex; margin-bottom:2%;">InBrowser request id: ' + requestId + '</div></body></html>',
+                        }
+
+                        // if forbidden is checked, return 403, also just for science
+                        if (forbidden.checked) {
+
+                            response.StatusCode = 403;
+                            response.Body = "Javascript response: No way!";
+                        }
+
+                        // add some headers to the response, because why not
+                        response.Headers = [
+                            { Key: "Answered-by", Value: "Javascript on " + navigator.userAgent },
+                            { Key: "X-InBrowserCorrelationId", Value: requestId.toString() }
+                        ];
+
+                        // finally send the response back to the client through the tunnel
+                        ws.send(JSON.stringify(response));
+                    };
+
+                    // if the ws connection is closed or has error, display it, it helps sometimes
+                    ws.onerror = function(evt) { output.value = "Error: " + evt.data + "\n"; };
+                    ws.onclose = function() { output.value += "Closed\n"; };
+                });
+        });
+
+        // sounds even more professional
+        document.getElementById("disconnect").addEventListener("click", () => {
+            output.value = "Request to close";
+            if (ws) ws.close();
+        });
+
+        // clear some stuff
+        document.getElementById("clear").addEventListener("click", () => { output.value = ""; });
+    </script>
+</body>
+</html>

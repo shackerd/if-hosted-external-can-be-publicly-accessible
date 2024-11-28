@@ -1,0 +1,6 @@
+@wasm_http_reverse_proxy_HostAddress = http://localhost:5230
+
+POST {{wasm_http_reverse_proxy_HostAddress}}/tunnel/
+Accept: application/json
+
+###
